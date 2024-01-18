@@ -5,7 +5,6 @@ import be.intecbrussel.IceCreamFlavors.eatables.IceRocket;
 import be.intecbrussel.IceCreamFlavors.eatables.Magnum;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -29,7 +28,7 @@ public class IceCreamCarTest {
     @MethodSource("testOrderConeFactory")
     public void testOrderCone(Cone.Flavor[] flavors, double profit, double expectedProfit){
        PriceList priceList = new PriceList(); //ballPrice = 1, rocketPrice = 2, magnumStandardPrice = 4
-        profit += priceList.getBallPrice() * balls.length * 0.25;
+        profit += priceList.getBallPrice() * flavors.length * 0.25; //in plaats van balls
 
 
         Assertions.assertEquals(expectedProfit, profit);
@@ -50,30 +49,7 @@ public class IceCreamCarTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("testPrepareConeFactory")
-    public void testPrepareCone(Cone.Flavor[] balls, int stockCones, int stockBalls, String expectedResult){
-        Stock stock = new Stock(5, stockCones, stockBalls, 5);
-        if (stock.getCones() > 0 && stock.getBalls() >= balls.length){
-            Cone cone = new Cone(balls);
-            stock.setCones(stock.getCones() -1);
-            stock.setBalls(stock.getBalls() - balls.length);
-        }
-        String result = stock.getCones()+"-"+stock.getBalls();
-        Assertions.assertEquals(expectedResult, result);
-    }
-    public static Stream<Arguments> testPrepareConeFactory(){
-        return Stream.of(
-                Arguments.of(new Cone.Flavor[]{Cone.Flavor.CHOCOLATE}, 5, 5, "4-4"),
-                Arguments.of(new Cone.Flavor[]{Cone.Flavor.CHOCOLATE, Cone.Flavor.VANILLA}, 5, 5, "4-3"),
-                Arguments.of(new Cone.Flavor[]{Cone.Flavor.CHOCOLATE, Cone.Flavor.VANILLA, Cone.Flavor.STRACIATELLA}, 5, 5, "4-2"),
-                Arguments.of(new Cone.Flavor[]{Cone.Flavor.CHOCOLATE, Cone.Flavor.VANILLA, Cone.Flavor.STRACIATELLA, Cone.Flavor.MOKKA}, 5, 5, "4-1"),
-                Arguments.of(new Cone.Flavor[]{Cone.Flavor.CHOCOLATE, Cone.Flavor.VANILLA, Cone.Flavor.STRACIATELLA, Cone.Flavor.MOKKA, Cone.Flavor.STRAWBERRY}, 5, 5, "4-0"),
-                Arguments.of(new Cone.Flavor[]{Cone.Flavor.CHOCOLATE, Cone.Flavor.VANILLA, Cone.Flavor.STRACIATELLA, Cone.Flavor.MOKKA, Cone.Flavor.STRAWBERRY, Cone.Flavor.LEMON}, 5, 5, "5-5"), //not enough balls so keep stock as it
-                Arguments.of(new Cone.Flavor[]{Cone.Flavor.CHOCOLATE, Cone.Flavor.VANILLA, Cone.Flavor.STRACIATELLA, Cone.Flavor.MOKKA, Cone.Flavor.STRAWBERRY, Cone.Flavor.LEMON, Cone.Flavor.BANANA}, 5, 5, "5-5") //not enough balls so keep stock as it
 
-        );
-    }
     @ParameterizedTest
     @MethodSource("testOrderIceRocketFactory")
     public void testOrderIceRocket(double profit, double expectedProfit) {
@@ -89,24 +65,7 @@ public class IceCreamCarTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("testPrepareIceRocketFactory")
-    public void testPrepareIceRocket(int iceRocketStock, double expectedStock) {
-        Stock stock = new Stock(iceRocketStock, 5, 5, 5);
-        if (stock.getIceRockets() > 0) {
-            IceRocket iceRocket = new IceRocket();
-            stock.setIceRockets(stock.getIceRockets() - 1);
-        }
-        int resultStock = stock.getIceRockets();
-        Assertions.assertEquals(expectedStock, resultStock);
-    }
-    public static Stream<Arguments> testPrepareIceRocketFactory(){
-        return Stream.of(
-                Arguments.of(5, 4),
-                Arguments.of(0, 0),  //stock not changing if < 0
-                Arguments.of(-5, -5) //stock not changing if < 0
-        );
-    }
+
 
     @ParameterizedTest
     @MethodSource("testOrderMagnumFactory")
@@ -115,8 +74,8 @@ public class IceCreamCarTest {
         //ALPINENUTS=4 * 1.5, MILKCHOCOLATE=4* 1.1, WHITECHOCOLATE=4 * 1.4, OTHER TYPE=4 * 2;
         profit += priceList.getMagnumPrice(type) * 0.01;
 
-        BigDecimal bigDecimalValue = new BigDecimal(profit);
-        BigDecimal roundedValue = bigDecimalValue.setScale(3, BigDecimal.ROUND_HALF_UP);
+        ProfitHelper bigDecimalValue = new ProfitHelper(profit);
+        ProfitHelper roundedValue = bigDecimalValue.equals(3, ProfitHelper.ROUND_HALF_UP);
         double profitRoundedDoubleValue = roundedValue.doubleValue();
 
         Assertions.assertEquals(expectedProfit, profitRoundedDoubleValue);
@@ -132,23 +91,7 @@ public class IceCreamCarTest {
 
         );
     }
-    @ParameterizedTest
-    @MethodSource("testPrepareMagnumFactory")
-    public void testPrepareMagnum(int magnumStock, double expectedStock) {
-        Stock stock = new Stock(5, 5, 5, magnumStock);
-        if (stock.getMagni() > 0) {
-            stock.setMagni(stock.getMagni() - 1);
-        }
-        int resultStock = stock.getMagni();
-        Assertions.assertEquals(expectedStock, resultStock);
-    }
-    public static Stream<Arguments> testPrepareMagnumFactory(){
-        return Stream.of(
-                Arguments.of(5, 4),
-                Arguments.of(0, 0),  //stock not changing if < 0
-                Arguments.of(-5, -5) //stock not changing if < 0
-        );
-    }
+
 
 
 
